@@ -1,44 +1,60 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const graphQLHttp = require('express-graphql');
-const {buildSchema} = require('graphql');
+const graphqlHttp = require('express-graphql');
+const { buildSchema } = require('graphql');
 
-//Object for express
 const app = express();
 
-app.use(
-    bodyParser.json()
-)
+const events = [];
+
+app.use(bodyParser.json());
 
 app.use(
-    '/apigraphql',
-    graphQLHttp({
-        schema:buildSchema(`
-            type rootQuery{
-                events : [String!]!
-            }
-            
-            type rootMutation{
-                createEvent(name:String) : String
-            }
-            schema{
-                query:rootQuery
-                mutation:rootMutation
-                }
+  '/graphql',
+  graphqlHttp({
+    schema: buildSchema(`
+        type Event {
+          _id: ID!
+          title: String!
+          description: String!
+          price: Float!
+          date: String!
+        }
+        input EventInput {
+          title: String!
+          description: String!
+          price: Float!
+          date: String!
+        }
+        type RootQuery {
+            events: [Event!]!
+        }
+        type RootMutation {
+            createEvent(eventInput: EventInput): Event
+        }
+        schema {
+            query: RootQuery
+            mutation: RootMutation
+        }
+    `),
+    rootValue: {
+      events: () => {
+        return events;
+      },
+      createEvent: args => {
+        const event = {
+          _id: Math.random().toString(),
+          title: args.eventInput.title,
+          description: args.eventInput.description,
+          price: +args.eventInput.price,
+          date: args.eventInput.date
+        };
+        events.push(event);
+        return event;
+      }
+    },
+    graphiql: true
+  })
+);
 
-        `),
-        rootValue:{
-            events :() => {
-                return ['String 1','String 2','String 3']
-            },
-            createEvent: (args) => {
-                //the args.name is the name at the top of the createEventf
-                const eventName =  args.name;
-                return eventName;
-            } 
-        },
-        graphiql:true
-    })
-);//end of app.use('/graphql'..)
-
-app.listen(5000,() => console.log(`Connected on 5000,right now`))
+app.listen(5000,()=>{"Connected at 5000"});
