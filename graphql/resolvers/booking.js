@@ -1,6 +1,6 @@
 const Booking = require("../../models/booking");
 const Event = require("../../models/event")
- b const  {transformBooking,transformEvent} =  require('./merge')
+const  {transformBooking,transformEvent} =  require('./merge')
 
 
 
