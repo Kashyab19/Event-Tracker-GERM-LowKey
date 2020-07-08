@@ -9,9 +9,10 @@ const graphQLSchema = require("./graphql/schema/index")
 const graphQLResolvers = require("./graphql/resolvers/index")
 
 const bcrpyt = require('bcryptjs')
+const isAuth =require("./middleware/isAuth")
 
-
-
+//runs on every incoming request
+app.use(isAuth)
 
 app.use(bodyParser.json());
 
