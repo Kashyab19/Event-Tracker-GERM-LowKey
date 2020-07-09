@@ -4,10 +4,12 @@ import './App.css';
 import AuthPage from './pages/Auth';
 import EventPage from './pages/Events';
 import BookingPage from './pages/Booking';
+import MainNavBar from './components/Navigation/MainNavigation';
 
 function App() {
   return (
     <BrowserRouter>
+    <MainNavBar/>
       <Switch>
         <Redirect from="/" to="/auth" exact/>
         <Route path="/auth" component = {AuthPage}/>
