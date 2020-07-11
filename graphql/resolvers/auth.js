@@ -2,17 +2,19 @@ const bcrpyt = require('bcryptjs')
 const User = require("../../models/user");
 const {dateToString} = require("../../helper/date");
 const jwt = require('jsonwebtoken');
-const { urlencoded } = require('body-parser');
+
 
 module.exports = {
-    createUser: async args => {
+    
+  
+  createUser: async args => {
       try{
       const existingUser =await User.findOne({ email: args.userInput.email })
         
       if (existingUser) {
           throw new Error('User exists already.');
           }
-      const hashedPassword = await bcrypt.hash(args.userInput.password, 12);
+      const hashedPassword = await bcrypt.hash(args.userInput.password, 12).then(()=>{console.log("Hashed")}).catch((err)=>{console.log(err)});
       const user = new User({
             email: args.userInput.email,
             password: hashedPassword
