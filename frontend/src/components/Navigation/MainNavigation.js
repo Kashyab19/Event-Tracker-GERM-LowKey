@@ -10,7 +10,7 @@ const mainNavigation = props => (
 
 <header className="main-navigation">
     <div className="main-navigation__logo">
-      <h1>LowKey🔑</h1>
+      <h1>LowKey<span role="img" aria-label="sheep">🔑</span></h1>
     </div>
     <nav className="main-navigation__items">
       <ul>
@@ -21,12 +21,20 @@ const mainNavigation = props => (
       )}
         
         <li>
-          <NavLink to="/events">Events</NavLink>
+          <NavLink to="/events">Events<span role="img" aria-label="sheep">🎫</span></NavLink>
         </li>
       
-      {context.token && <li>
-          <NavLink to="/bookings">Bookings</NavLink>
+      {context.token && 
+        
+        (<React.Fragment>
+        <li>
+          <NavLink to="/bookings">Bookings<span role="img" aria-label="sheep">®️</span></NavLink>
         </li>
+
+        <li>
+          <button onClick={context.logout}>Logout<span role="img" aria-label="sheep">📤</span></button>
+        </li>
+        </React.Fragment>)
       } 
       </ul>
     </nav>
