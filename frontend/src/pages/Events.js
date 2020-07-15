@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-
+import EventList from "../components/Events/EventList/EventList"
+import Spinner from "../components/Spinner/Spinner"
 import ModalPop from '../components/Modal/Modal';
 import Backdrop from '../components/Backdrop/Backdrop';
 import AuthContext from "../context/auth-context"
@@ -8,7 +9,9 @@ import './Events.css';
 class EventPage extends Component {
   state = {
     creating: false,
-    events: []
+    events: [],
+    isLoading:false,
+    selectedEvent: null
   };
 
   constructor(props)
@@ -56,6 +59,7 @@ class EventPage extends Component {
           title
           description
           price
+          date
           creator {
             _id
             email
@@ -81,16 +85,21 @@ class EventPage extends Component {
         return res.json();
       })
       .then(resData => {
-        this.fetchEvents();
-        // if(resData.data.login.token)
-        // {
-        //   this.context.login(
-        //     resData.data.login.token,
-        //     resData.data.login.userId,
-        //     resData.data.login.tokenExpiration
-            
-        //   )
-        // }
+        this.setState(prevState => {
+          const updatedEvents = [...prevState.events];
+          updatedEvents.push({
+            _id: resData.data.createEvent._id,
+            title: resData.data.createEvent.title,
+            description: resData.data.createEvent.description,
+            date: resData.data.createEvent.date,
+            price: resData.data.createEvent.price,
+            creator: {
+              _id: this.context.userId
+            }
+          });
+          return { events: updatedEvents };
+        });
+       
       })
       .catch(err => {
         console.log(err);
@@ -99,12 +108,21 @@ class EventPage extends Component {
 
   };
 
+  showDetailHandler = eventId => {
+    this.setState(prevState => {
+      const selectedEvent = prevState.events.find(e => e._id === eventId);
+      return { selectedEvent: selectedEvent };
+    });
+  }; 
+
   modalCancelHandler = () => {
-    this.setState({ creating: false });
+    this.setState({ creating: false ,selectedEvent:null });
   };
 
+  bookEventHandler = () =>{}
 
   fetchEvents(){
+    this.setState({ isLoading: true });
     const requestBody = {
       query: `
       query {
@@ -138,34 +156,21 @@ class EventPage extends Component {
       .then(resData => {
         console.log(resData);
         const events = resData.data.events;
-        this.setState({ events: events });
+        this.setState({ events: events ,isLoading:false});
       })
       .catch(err => {
         console.log(err);
+        this.setState({ isLoading: false });
       });
   }
 
 
 
   render() {
-    const eventList = this.state.events.map(event => {
-      return (    
-        <>
-        <li key={event._id} className="events__list-item">
-          <em><b>Title:</b></em>{event.title}
-          <li key={event._id} className="events__list-item">
-            <em><b>Description:</b></em>{event.description}
-          </li>
-        </li>
-      </>
-
-      );
-    });
-
     return (
       <React.Fragment>  
       <div className = "event-main">
-        {this.state.creating && <Backdrop />}
+        {(this.state.creating||this.state.selectedEvent) && <Backdrop />}
         
         {this.state.creating && (
           <ModalPop
@@ -204,6 +209,30 @@ class EventPage extends Component {
           </ModalPop>
           
         )}
+
+      {this.state.selectedEvent && (
+          <ModalPop
+            title={this.state.selectedEvent.title}
+            canCancel
+            canConfirm
+            onCancel={this.modalCancelHandler}
+            onConfirm={this.bookEventHandler}
+            confirmText="Book"
+          >
+            <h1>{this.state.selectedEvent.title}</h1>
+            <h2>
+              ${this.state.selectedEvent.price} -{' '}
+              {new Date(this.state.selectedEvent.date).toLocaleDateString()}
+            </h2>
+            <p>{this.state.selectedEvent.description}</p>
+          </ModalPop>
+        )}
+
+
+
+
+
+
         
         {this.context.token&&(
         <div className="events-control">
@@ -214,8 +243,13 @@ class EventPage extends Component {
         </div>
         )}
 
-      <ul className="events__list">{eventList}</ul>
+      
       </div>
+      {this.state.isLoading ? <Spinner/>:
+      <EventList events ={this.state.events} 
+       authUserId={this.context.userId}
+       onViewDetail={this.showDetailHandler}/>
+  }
       </React.Fragment>
     );
   }
