@@ -1,11 +1,11 @@
-/* .modal {
+.modal {
   width: 90%;
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   position: fixed;
   top: 20vh;
   left: 5%;
-} */
+}
 
 .modal__header {
   padding: 1rem;
@@ -31,7 +31,3 @@
   justify-content: flex-end;
   padding: 1rem;
 }
-/* 
-#dialog-box{
-  border-radius: 0.5rem;
-} */

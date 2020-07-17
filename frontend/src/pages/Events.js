@@ -13,7 +13,7 @@ class EventPage extends Component {
     isLoading:false,
     selectedEvent: null
   };
-
+  isActive = true;
   constructor(props)
   {
     super(props)
@@ -54,12 +54,11 @@ class EventPage extends Component {
     const requestBody = {
       query: `
       mutation {
-        createEvent(eventInput: { title: "${title}", description: "${description}", price: ${price}, date: "${date}"}) {
+        createEvent(eventInput: { title: "${title}", description: "${description}", price: ${price}, date: "${date}" }) {
           _id
           title
           description
           price
-          date
           creator {
             _id
             email
@@ -118,9 +117,47 @@ class EventPage extends Component {
   modalCancelHandler = () => {
     this.setState({ creating: false ,selectedEvent:null });
   };
+  
+  //Bookings
+  bookEventHandler = () => {
+    if (!this.context.token) {
+      this.setState({ selectedEvent: null });
+      return;
+    }
+    const requestBody = {
+      query: `
+          mutation {
+            bookEvent(eventId: "${this.state.selectedEvent._id}") {
+              _id
+            }
+          }
+        `
+    };
 
-  bookEventHandler = () =>{}
+    fetch('http://localhost:5000/graphql', {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + this.context.token
+      }
+    })
+      .then(res => {
+        if (res.status !== 200 && res.status !== 201) {
+          throw new Error('Failed!');
+        }
+        return res.json();
+      })
+      .then(resData => {
+        console.log(resData);
+        this.setState({ selectedEvent: null });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
 
+  //Fetch Events
   fetchEvents(){
     this.setState({ isLoading: true });
     const requestBody = {
@@ -149,22 +186,28 @@ class EventPage extends Component {
     })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
-          throw new Error('Failed!');
+          throw new Error('Event Fetching Failed!');
         }
         return res.json();
       })
       .then(resData => {
         console.log(resData);
         const events = resData.data.events;
+        if(this.isActive){
         this.setState({ events: events ,isLoading:false});
+        }
       })
       .catch(err => {
         console.log(err);
+        if(this.isActive){
         this.setState({ isLoading: false });
+        }
       });
   }
 
-
+  componentWillUnmount(){
+    this.isActive = false;
+  }
 
   render() {
     return (
@@ -179,6 +222,7 @@ class EventPage extends Component {
             canConfirm
             onCancel={this.modalCancelHandler}
             onConfirm={this.modalConfirmHandler}
+            confirmText='Confirm'
           >
             <p>Modal Content</p>
             <form>
@@ -217,18 +261,18 @@ class EventPage extends Component {
             canConfirm
             onCancel={this.modalCancelHandler}
             onConfirm={this.bookEventHandler}
-            confirmText="Book"
+            confirmText={this.context.token ? 'Book' : 'Confirm'}
           >
             <h1>{this.state.selectedEvent.title}</h1>
             <h2>
-              ${this.state.selectedEvent.price} -{' '}
-              {new Date(this.state.selectedEvent.date).toLocaleDateString()}
+              ${this.state.selectedEvent.price}
             </h2>
             <p>{this.state.selectedEvent.description}</p>
           </ModalPop>
         )}
 
-
+  
+          
 
 
 
