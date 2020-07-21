@@ -1,7 +1,18 @@
 const Event = require("../../models/event")
 const User = require("../../models/user")
 const {dateToString} = require("../../helper/date");
+const DataLoader = require('dataloader');
 
+
+const eventLoader = new DataLoader((eventIds)=>{
+  //events function below
+  return events(eventIds);
+})
+
+const userLoader = new DataLoader((userIds)=>{
+  //events function below
+  return User.find({_id:  {$in:userIds}})
+})
 
 const events = async eventIds =>{
 
