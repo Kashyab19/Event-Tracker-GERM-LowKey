@@ -9,6 +9,7 @@ const bookingList = props =>(
                 return(
                     <li className="bookings__item" key={booking._id}>
                         <div className="bookings__item-data">{booking.event.title}</div>
+                        <div className="bookings__item-data">Rs.{booking.event.price}</div>
                         <div className="bookings__item-actions"><Button onClick={props.onDelete.bind(this,booking._id)}>Cancel</Button></div>
                     </li>
                     ); //end of return

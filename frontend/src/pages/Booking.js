@@ -1,13 +1,16 @@
 import React,{Component} from 'react';
 import AuthContext from "../context/auth-context";
-import {Card , Button} from "react-bootstrap";
+import { Button, Spinner} from "react-bootstrap";
 import BookingList from "../components/Bookings/BookingList/BookingList"
+import BookingChart from '../components/Bookings/BookingsChart/BookingsChart';
+import BookingControl from '../components/Bookings/BookingControls/BookingControl';
 
 
 export default class BookingPage extends Component{
     state = {
         isLoading : false,
-        bookings : []
+        bookings : [],
+        outputType: 'list'
     }
 
     static contextType = AuthContext;
@@ -104,27 +107,39 @@ export default class BookingPage extends Component{
           });
       }
     
-    render(){
+changeOutputTypeHandler = outputType => {
+  if(outputType==='list'){
+    this.setState({outputType:'list'})
+  }
+  else{
+    this.setState({outputType:'chart'})
+  }
+}
+      
+render(){
+      let content = <Spinner/>;
+      if(!this.state.isLoading){
+        content = (
+          <React.Fragment>
+           
+            <div>
+              {this.state.outputType==='list'
+              ?
+              (<BookingList bookings={this.state.bookings} onDelete={this.deleteBookingHandler}/>)
+              :
+              (<h1><BookingChart bookings={this.state.bookings}/></h1>)
+              }
+            </div>
+          </React.Fragment>
+        );
+      }
         return(
             <React.Fragment>
+            <BookingControl activeOutputType={this.state.outputType}
+            onChange={this.changeOutputTypeHandler}
+      />
             <div>
-            <h1>Bookings</h1>
-            <h1>Your bookings are listed below</h1>
-            {/* <ul>
-            {this.state.bookings.map(booking => (
-             <Card style={{ width: '18rem' }} key={booking._id} id="card">
-             <Card.Body>
-             <Card.Title id="card-title">{booking.event.title}</Card.Title>
-             <Card.Text>
-             {booking.event.description}
-             </Card.Text>
-            <Button variant="primary">₹{booking.event.price}</Button>
-            </Card.Body>
-            </Card>
-            )
-            )}
-            </ul> */}
-            <BookingList bookings={this.state.bookings} onDelete={this.deleteBookingHandler}/>
+            {content}
             </div>
             </React.Fragment>
             );
