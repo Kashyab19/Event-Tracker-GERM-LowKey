@@ -23,7 +23,7 @@ const bookingChart = (props) =>{
         chartData.labels.push(bucket);
         chartData.datasets.push({
           // label: "My First dataset",
-          fillColor: 'rgb(212, 81, 19)',
+          fillColor: 'rgb(119, 0, 88)',
           strokeColor: 'rgba(220,220,220,0.8)',
           highlightFill: 'rgba(220,220,220,0.75)',
           highlightStroke: 'rgba(220,220,220,1)',
